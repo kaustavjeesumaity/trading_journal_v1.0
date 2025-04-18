@@ -5,12 +5,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <script>
+        function dismissFlashMessage(element) {
+            element.parentElement.style.display = 'none';
+        }
+    </script>
+
     <h1>Edit Trade</h1>
     <div class="flash-messages">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
+                <div class="flash {{ category }}">{{ message }} <button onclick="dismissFlashMessage(this)">X</button></div>
                 {% endfor %}
             {% endif %}
         {% endwith %}

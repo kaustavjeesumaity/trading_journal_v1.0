@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trade Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="trade-details">
+        <h2>{{ trade.symbol }} Trade Details</h2>
+        <div class="status-badge {{ 'closed' if trade.status == 'CLOSED' else 'open' }}">
+            {{ trade.status }}
+        </div>
+        
+        <div class="time-info">
+            <p>Start: {{ trade.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
+            {% if trade.end_time %}
+            <p>End: {{ trade.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="pnl-info">
+            <p>Gross P&L: {{ "%.2f"|format(trade.gross_pnl) }}</p>
+            <p>Charges: {{ "%.2f"|format(trade.charges) }}</p>
+            <p>Net P&L: {{ "%.2f"|format(trade.net_pnl) }}</p>
+        </div>
+
+        <div class="notes-section">
+            <h3>Notes</h3>
+            <p>{{ trade.notes }}</p>
+        </div>
+
+        <div class="image-gallery">
+            {% for image in trade.images %}
+            <div class="image-thumbnail" 
+            data-image-url="{{ url_for('get_file', filename=image.filename) }}"
+            onclick="openModal(this.dataset.imageUrl)">
+           <img src="{{ url_for('get_file', filename=image.filename) }}" alt="Trade image">
+            </div>
+            {% endfor %}
+        </div>
+
+        <div id="imageModal" class="modal">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <img class="modal-content" id="modalImage">
+        </div>
+
+        <a href="{{ url_for('index') }}" class="btn-back">Back to List</a>
+    </div>
+
+    <script>
+    function openModal(src) {
+        document.getElementById('modalImage').src = src;
+        document.getElementById('imageModal').style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById('imageModal').style.display = "none";
+    }
+    </script>
+</body>
+</html>

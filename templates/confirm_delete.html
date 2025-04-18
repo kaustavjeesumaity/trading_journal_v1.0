@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirm Delete</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="confirmation-box">
+        <h2>Confirm Trade Deletion</h2>
+        <div class="trade-info">
+            <p><strong>Symbol:</strong> {{ trade.symbol }}</p>
+            <p><strong>Start Time:</strong> {{ trade.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
+            {% if trade.end_time %}
+            <p><strong>End Time:</strong> {{ trade.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+            {% endif %}
+            <p><strong>Status:</strong> <span class="status {{ trade.status|lower }}">{{ trade.status }}</span></p>
+        </div>
+
+        {% if trade.images %}
+        <div class="images-to-delete">
+            <h3>Images that will be deleted:</h3>
+            <div class="image-preview-grid">
+                {% for image in trade.images %}
+                <img src="{{ url_for('get_file', filename=image.filename) }}" 
+                     class="preview-image"
+                     alt="Trade image {{ loop.index }}">
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            <button type="submit" class="btn-danger">Permanently Delete Trade</button>
+            <a href="{{ url_for('index') }}" class="btn-cancel">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

@@ -19,9 +19,9 @@
         </div>
         
         <div class="pnl-info">
-            <p>Gross P&L: {{ "%.2f"|format(trade.gross_pnl) }}</p>
-            <p>Charges: {{ "%.2f"|format(trade.charges) }}</p>
-            <p>Net P&L: {{ "%.2f"|format(trade.net_pnl) }}</p>
+            <p>Gross P&L: {{ "%.2f"|format(trade.gross_pnl) if trade.gross_pnl else '-' }}</p>
+            <p>Charges: {{ "%.2f"|format(trade.charges) if trade.charges else '-' }}</p>
+            <p>Net P&L: {{ "%.2f"|format(trade.net_pnl) if trade.net_pnl else '-' }}</p>
         </div>
 
         <div class="notes-section">

@@ -36,7 +36,7 @@ class Trade(db.Model):
     def net_pnl(self):
         if self.gross_pnl is not None and self.charges is not None:
             return self.gross_pnl - self.charges
-        return None
+        return 0
     
     
 class TradeImage(db.Model):
@@ -66,22 +66,26 @@ def view_trade(id):
 def add_trade():
     if request.method == 'POST':
         try:
-            # Required fields
+            end_time = request.form.get('end_time')
+            is_closed = bool(end_time)
+            
+            # Validate closed trade requirements
+            if is_closed:
+                if not all([request.form.get('gross_pnl'), request.form.get('charges')]):
+                    flash('Gross P&L and Charges are required for closed trades', 'error')
+                    return render_template('add_trade.html')
+
             trade = Trade(
                 start_time=datetime.fromisoformat(request.form['start_time']),
                 symbol=request.form['symbol'],
-                gross_pnl=float(request.form['gross_pnl']),
-                charges=float(request.form['charges']),
-                entry_price=float(request.form['entry_price']),
-                exit_price=float(request.form['exit_price']),
-                quantity=float(request.form['quantity'])
+                gross_pnl=float(request.form['gross_pnl']) if request.form.get('gross_pnl') else None,
+                charges=float(request.form['charges']) if request.form.get('charges') else None,
+                entry_price=float(request.form.get('entry_price', 0)),
+                exit_price=float(request.form.get('exit_price', 0)),
+                quantity=float(request.form.get('quantity', 0)),
+                notes=request.form.get('notes', ''),
+                end_time=datetime.fromisoformat(end_time) if end_time else None
             )
-
-            # Optional fields
-            if request.form.get('end_time'):
-                trade.end_time = datetime.fromisoformat(request.form['end_time'])
-            if request.form.get('notes'):
-                trade.notes = request.form['notes']
             
             db.session.add(trade)
             db.session.commit()
@@ -111,11 +115,22 @@ def edit_trade(id):
     
     if request.method == 'POST':
         try:
+            end_time = request.form.get('end_time')
+            is_closed = bool(end_time)
+            # Validate closed trade requirements
+            if is_closed:
+                print([request.form.get('gross_pnl'), request.form.get('charges')])
+                if not all([request.form.get('gross_pnl'), request.form.get('charges')]):
+                    print('Here')
+                    flash('Gross P&L and Charges are required for closed trades', 'error')
+                    return render_template('edit_trade.html', trade=trade)
+
+            # Update fields
+            trade.gross_pnl = float(request.form['gross_pnl']) if request.form.get('gross_pnl') else None
+            trade.charges = float(request.form['charges']) if request.form.get('charges') else None
             # Update basic fields
             trade.start_time = datetime.fromisoformat(request.form['start_time'])
             trade.symbol = request.form['symbol']
-            trade.gross_pnl = float(request.form['gross_pnl'])
-            trade.charges = float(request.form['charges'])
             trade.notes = request.form.get('notes', '')
             
             # Handle end time (optional)
@@ -162,8 +177,7 @@ def edit_trade(id):
                          images=trade.images)
 
 
-# Add this at the top after creating Flask app
-app.secret_key = 'your-secret-key-here'  # Required for flash messages
+# Add this at the top after creating Flask app  # Required for flash messages
 
 # Update delete route
 @app.route('/delete/<int:id>', methods=['GET', 'POST'])

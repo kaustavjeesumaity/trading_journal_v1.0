@@ -7,9 +7,15 @@
 <body>
     <div class="trade-details">
         <h2>{{ trade.symbol }} Trade Details</h2>
-        <div class="status-badge {{ 'closed' if trade.status == 'CLOSED' else 'open' }}">
+        
+        <p>Entry Price: {{ "%.5f"|format(trade.entry_price) }}</p>
+        {% if trade.exit_price %}
+            <p>Exit Price: {{ "%.5f"|format(trade.exit_price) }}</td>
+        {% endif %}
+        <p>Quantity :{{ "%.2f"|format(trade.quantity) }}</p>
+        <td class="status {{ trade.status|lower }}">
             {{ trade.status }}
-        </div>
+        </td>
         
         <div class="time-info">
             <p>Start: {{ trade.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
@@ -44,7 +50,7 @@
             <img class="modal-content" id="modalImage">
         </div>
 
-        <a href="{{ url_for('index') }}" class="btn-back">Back to List</a>
+        <a href="{{ url_for('index', **current_filter) }}" class="btn-back">Back to List</a>
     </div>
 
     <script>

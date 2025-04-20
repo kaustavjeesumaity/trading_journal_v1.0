@@ -21,7 +21,9 @@
             {% endif %}
         {% endwith %}
     </div>
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" action="{{ url_for('edit_trade', id=trade.id, **current_filter) }}" enctype="multipart/form-data">
+        <input type="hidden" name="platform" value="{{ current_filter.platform }}">
+        <input type="hidden" name="account_number" value="{{ current_filter.account }}">
         <label>Start Time:</label>
         <input type="datetime-local" name="start_time"  value="{{ trade.start_time }}" required>
     
@@ -56,12 +58,10 @@
         <input type="text" name="symbol" value="{{ trade.symbol }}" required>
 
         <label>Entry Price:</label>
-        <input type="number" step="0.01" name="entry_price" 
-               value="{{ trade.entry_price }}" required>
+        <input type="number" step="0.00001" name="entry_price" value="{{ trade.entry_price }}" required>
 
         <label>Exit Price:</label>
-        <input type="number" step="0.01" name="exit_price" 
-               value="{{ trade.exit_price }}" required>
+        <input type="number" step="0.00001" name="exit_price" value="{{ trade.exit_price }}">
 
         <label>Quantity:</label>
         <input type="number" step="0.01" name="quantity" value="{{ trade.quantity }}" required>
@@ -70,7 +70,7 @@
         <textarea name="notes">{{ trade.notes }}</textarea>
 
         <button type="submit" class="btn-save">Update Trade</button>
-        <a href="/" class="btn-cancel">Cancel</a>
+        <a href="{{ url_for('index', **current_filter) }}" class="btn-cancel">Cancel</a>
     </form>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

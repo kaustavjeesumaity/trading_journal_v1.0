@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Account</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Create New Trading Account</h1>
+        
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label>Platform:</label>
+                <select name="platform" required>
+                    <option value="">Select Platform</option>
+                    <option value="MT5">MT5</option>
+                    <option value="Manual">Manual</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Account Number:</label>
+                <input type="text" name="account_number" required 
+                       pattern="[A-Za-z0-9-]+" title="Alphanumeric characters and hyphens only">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Create Account</button>
+                <a href="{{ url_for('index',**current_filter) }}" class="btn-cancel">Back to Trades</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

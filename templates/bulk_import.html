@@ -1,0 +1,26 @@
+<!-- templates/bulk_import.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bulk Import</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Bulk Import Trades</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+                <label>MT5 Account:</label>
+                <select name="account_number" required>
+                    {% for account in mt5_accounts %}
+                    <option value="{{ account.account_number }}">{{ account.account_number }}</option>
+                    {% endfor %}
+                </select>
+            <label>CSV File:</label>
+            <input type="file" name="csv_file" accept=".csv" required>
+            <small>Expected format: MT4/MT5 statement CSV with position IDs</small>
+        </div>
+        <button type="submit" class="btn-import">Import Trades</button>
+        <a href="{{ url_for('index',**current_filter) }}" class="btn-cancel">Cancel</a>
+    </form>
+</body>
+</html>

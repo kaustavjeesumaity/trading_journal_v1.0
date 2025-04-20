@@ -3,6 +3,18 @@
 <head>
     <title>Trade Journal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <div class="header-controls">
+        <div class="platform-selector">
+            <select id="platformSelect">
+                <option value="">Select Platform</option>
+                <option value="MT5">MT5</option>
+                <option value="Manual">Manual</option>
+            </select>
+            
+            <select id="accountSelect" disabled>
+                <option value="">Select Account</option>
+            </select>
+        </div>
 </head>
 <body>
     <script>
@@ -20,8 +32,25 @@
             {% endif %}
         {% endwith %}
     </div>
-    <a href="/add" class="btn-add">Add New Trade</a>
+    
+    <!-- Header Section -->
 
+    
+    <a href="{{ url_for('add_account', **current_filter) }}" class="btn-add-account">+ Add Account</a>
+    <a href="{{ url_for('add_trade', **current_filter) }}" class="btn-add">
+        Add New Trade
+    </a>
+    <a href="{{ url_for('bulk_import', **current_filter) }}" class="btn-import">Bulk Import</a>
+</div>
+{% if not current_filter.account %}
+<div class="empty-state">
+    <p>Please select a platform and account to view trades</p>
+</div>
+{% elif not trades %}
+<div class="empty-state">
+    <p>No trades found for selected account</p>
+</div>
+{% endif %}
     <table>
         <tr>
             <th>Start Time</th>
@@ -46,7 +75,7 @@
             <td class="status {{ trade.status|lower }}">
                 {{ trade.status }}
             </td>
-            <td><a href="{{ url_for('view_trade', id=trade.id) }}">{{ trade.symbol }}</a></td>
+            <td><a href="{{ url_for('view_trade', id=trade.id, **current_filter) }}">{{ trade.symbol }}</a></td>
             <td>
                 {% if trade.gross_pnl %}
                     {{ "%.2f"|format(trade.gross_pnl) }}
@@ -55,12 +84,12 @@
                 {% endif %}
             </td>
             <td>{{ "%.2f"|format(trade.charges) if trade.charges else '-' }}</td>
-            <td class="{{ 'profit' if trade.net_pnl >=0 else 'loss' }}">
+            <td class="{{ 'profit' if not trade.net_pnl else 'profit' if trade.net_pnl >=0 else 'loss' }}">
                 {{ "%.2f"|format(trade.net_pnl) if trade.net_pnl is not none else '-' }}
             </td>
             <td>
-                <a href="/edit/{{ trade.id }}" class="btn-edit">Edit</a>
-                <a href="{{ url_for('delete_trade', id=trade.id) }}" class="btn-delete">Delete</a>
+                <a href="{{ url_for('edit_trade', id=trade.id, **current_filter) }}" class="btn-edit">Edit</a>
+                <a href="{{ url_for('delete_trade', id=trade.id, **current_filter) }}" class="btn-delete">Delete</a>
             </td>
         </tr>
         {% endfor %}
@@ -71,7 +100,9 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='chart.js', **current_filter) }}"></script>
+    <script src="{{ url_for('static', filename='account.js') }}"></script>
+    <script src="{{ url_for('static', filename='filter.js') }}"></script>
     <script>
     function confirmDelete(tradeId) {
         if (confirm('Are you sure you want to delete this trade?')) {
@@ -80,5 +111,37 @@
         }
     }
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const platformSelect = document.getElementById('platformSelect');
+            const accountSelect = document.getElementById('accountSelect');
+            
+            // Initialize from URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialPlatform = urlParams.get('platform');
+            const initialAccount = urlParams.get('account');
+            
+            if(initialPlatform) {
+                platformSelect.value = initialPlatform;
+                loadAccounts(initialPlatform).then(() => {
+                    accountSelect.value = initialAccount;
+                });
+            }
+            
+            // Update URL when selections change
+            function updateUrl() {
+                const params = new URLSearchParams();
+                if(platformSelect.value) params.set('platform', platformSelect.value);
+                if(accountSelect.value) params.set('account', accountSelect.value);
+                window.location.search = params.toString();
+            }
+            
+            platformSelect.addEventListener('change', function() {
+                if(this.value) updateUrl();
+            });
+            
+            accountSelect.addEventListener('change', updateUrl);
+        });
+        </script>
 </body>
 </html>
